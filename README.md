@@ -7,7 +7,7 @@ Repository with **Python** scripts, examples and test stuff.
 
 This script uses **csv** and **optparse** external libraries.
 ##Install:
-First, you need to install ext libraries:
+First, you need to install external libraries:
 ```bash
 pip install cvs
 pip install optparse
