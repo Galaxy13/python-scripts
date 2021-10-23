@@ -32,7 +32,7 @@ class CsvCompare:
                 value1 = float(dict1[key])
                 value2 = float(dict2[key])
             except:
-                print("Error: no name " + dict1[key] + "in" + self.path2)
+                print("Error: no name " + key + "in" + self.path2)
                 return None
             if dict1[key] < dict2[key]:
                 self.result.append(str(key) + ',' + dict1[key] + ',' +
@@ -43,6 +43,6 @@ class CsvCompare:
         return self.result
 
 
-# example launch of method csvCompare.compare
+# launch of method csvCompare.compare
 result = CsvCompare(options.path1, options.path2)
 print(result.compare())
