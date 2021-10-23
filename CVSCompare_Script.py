@@ -18,9 +18,9 @@ class CsvCompare:
 
     # open files and creating a dict files
     def file(self):
-        # results1, results2 = {}, {}
-        csv_1 = dict(csv.reader(open(self.path1)))
-        csv_2 = dict(csv.reader(open(self.path2)))
+        with open(self.path1) as f1, open(self.path2) as f2:
+            csv_1 = dict(csv.reader(f1))
+            csv_2 = dict(csv.reader(f2))
         return csv_1, csv_2
 
     # comparing value column
