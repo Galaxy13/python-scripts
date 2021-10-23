@@ -4,9 +4,9 @@ from optparse import OptionParser
 
 # adding and initializing option parser
 parser = OptionParser
-parser.add_option('-f1', '--file1', dest='path1',
+parser.add_option('-f1', dest='path1', type='string',
                   help='gets path of first csv file', metavar='FILEPATH')
-parser.add_option('-f2', '--file2', dest='path2',
+parser.add_option('-f2', dest='path2', type='string',
                   help='gets path of second csv file', metavar='FILEPATH')
 (options, args) = parser.parse_args()
 
@@ -29,20 +29,19 @@ class CsvCompare:
     def compare(self):
         dict1 = CsvCompare.file(self)[0]
         dict2 = CsvCompare.file(self)[1]
-        for key1 in dict1:
-            for key2 in dict2:
-                if key1 == key2:
-                    try:
-                        value1 = float(dict1[key1])
-                        value2 = float(dict2[key2])
-                    except:
-                        continue
-                    if dict1[key1] < dict2[key2]:
-                        self.result.append(
-                            str(key1) + ',' + dict1[key1] + ',' + dict2[key2] + ', ' + str(value1 / value2 * 100))
-                    elif dict1[key1] > dict2[key2]:
-                        self.result.append(
-                            str(key1) + ',' + dict1[key1] + ',' + dict2[key2] + ', ' + str(value2 / value1 * 100))
+        for key in dict1:
+            try:
+                value1 = float(dict1[key])
+                value2 = float(dict2[key])
+            except:
+                print("Error: no name " + dict1[key] + "in" + self.path2)
+                return None
+            if dict1[key] < dict2[key]:
+                self.result.append(str(key) + ',' + dict1[key] + ',' +
+                                   dict2[key] + ', ' + str(value1 / value2 * 100))
+            elif dict1[key] > dict2[key]:
+                self.result.append(str(key) + ',' + dict1[key] + ',' + dict2[key] +
+                                   ', ' + str(value2 / value1 * 100))
         return self.result
 
 
