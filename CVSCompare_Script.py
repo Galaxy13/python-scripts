@@ -3,11 +3,9 @@ import csv
 from optparse import OptionParser
 
 # adding and initializing option parser
-parser = OptionParser
-parser.add_option('-f1', dest='path1', type='string',
-                  help='gets path of first csv file', metavar='FILEPATH')
-parser.add_option('-f2', dest='path2', type='string',
-                  help='gets path of second csv file', metavar='FILEPATH')
+parser = OptionParser()
+parser.add_option('--f1', '--file1', dest='path1', type='string', help='gets path of first csv file')
+parser.add_option('--f2', '--file2', dest='path2', type='string', help='gets path of second csv file')
 (options, args) = parser.parse_args()
 
 

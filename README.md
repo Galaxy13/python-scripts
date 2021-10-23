@@ -22,7 +22,9 @@ or just get the script from GitHub.
 
 To launch your script, execute:
 ```bash
-python -m CVSCompare_Script.py --filepath1 --filepath2
+python -m CVSCompare_Script --file1 filepath1 --file2 filepath2
+or
+python -m CVSCompare_Script --f1 filepath1 --f2 filepath2
 ```
 where **filepath1** and **filepath2** are your paths to files, you are comparing.
 
