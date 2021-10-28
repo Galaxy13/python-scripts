@@ -5,10 +5,10 @@ from optparse import OptionParser
 
 
 # adding and initializing option parser
-# parser = OptionParser()
-# parser.add_option('--f1', '--file1', dest='path1', type='string', help='gets path of first csv file')
-# parser.add_option('--f2', '--file2', dest='path2', type='string', help='gets path of second csv file')
-# (options, args) = parser.parse_args()
+parser = OptionParser()
+parser.add_option('--f1', '--file1', dest='path1', type='string', help='gets path of first csv file')
+parser.add_option('--f2', '--file2', dest='path2', type='string', help='gets path of second csv file')
+(options, args) = parser.parse_args()
 
 
 # defining class, appending paths of csv files and compare their 'value' column
@@ -37,13 +37,18 @@ class CsvCompare:
             except:
                 print("Error: no name " + key + " in " + self.path2)
                 return None
-            diff = round(abs((value1 - value2) / ((value1 + value2) / 2) * 100), 2)
-            self.result[key] = diff
-        self.result = {key: value for key, value in sorted(self.result.items(),
-                                                           key=lambda item: item[1])}
+            if value1 < value2:
+                diff = round((((value2 - value1) / value1) * 100), 2)
+                self.result[key] = diff
+            elif value1 > value2:
+                diff = round((((value1 - value2) / value2) * 100), 2)
+                self.result[key] = diff
+        self.result = {key: value for key, value in reversed(sorted(self.result.items(),
+                                                           key=lambda item: item[1]))}
         for key, value in self.result.items():
-            string = [key, dict1[key], dict2[key], str(value) + '%']
-            result_str.append(string)
+            if value != 0:
+                string = [key, dict1[key], dict2[key], str(value) + '%']
+                result_str.append(string)
         return result_str
 
 
