@@ -13,6 +13,8 @@ SUITS = ('C', 'S', 'H', 'D')
 RANKS = ('A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K')
 VALUES = {'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'T': 10, 'J': 10, 'Q': 10, 'K': 10}
 
+TABLE = simplegui.load_image("https://www.dropbox.com/s/h4ol6hlkasogwva/360_F_93364974_eoos8QGsa9CzTa5hGRRL6EutXMSKgdOA.jpg?dl=1")
+
 
 class Card:
     def __init__(self, suit, rank):
@@ -56,6 +58,7 @@ class Card:
 class Hand:
     def __init__(self):
         self.hand_cards = []
+        self.is_played = False
 
     def add_card(self, card):
         self.hand_cards.append(card)
@@ -70,14 +73,68 @@ class Hand:
             summ += VALUES[card.get_rank()]
             if card.get_rank() == 'A':
                 count += 1
-        if count == 1:
+        if count == 1 and summ + 10 <= 21:
             summ += 10
         return summ
+
+    def cover(self):
+        for card in self.hand_cards:
+            card.cover()
+
+    def expose(self):
+        for card in self.hand_cards:
+            card.expose()
+
+    def is_played(self):
+        return self.is_played
+
+    def played(self):
+        self.is_played = True
 
     def draw(self, canvas, pos):
         for card in self.hand_cards:
             card.draw(canvas, pos)
             pos[0] += 50
+
+class Balance:
+    def __init__(self, start_balance):
+        self.balance = start_balance
+        self.bet = 0
+        self.is_bet = False
+
+    # def bet(self):
+    #     self.balance -= self.bet
+
+    def add(self):
+        self.balance += self.bet * 2
+
+    def set_bet(self, bet):
+        self.bet = bet
+
+    def make_bet(self):
+        self.is_bet = True
+        self.balance -= self.bet
+
+    def new_bet(self):
+        self.is_bet = False
+
+    def is_bet(self):
+        return self.is_bet
+
+    def increase_bet(self, bet):
+        self.bet += bet
+
+    def decrease_bet(self, bet):
+        self.bet -= bet
+
+    def current_balance(self):
+        return self.balance
+
+    def current_bet(self):
+        return self.bet
+
+    def __str__(self):
+        return str(self.balance)
 
 class Deck:
     def __init__(self):
@@ -104,21 +161,30 @@ def draw_handler(canvas):
     player.draw(canvas, [200, 300])
     dealer.draw(canvas, [200, 100])
     canvas.draw_text(str(player.get_value()), [50, 300], 30, 'White')
-    canvas.draw_text(str(dealer.get_value()), [50, 100], 30, 'White')
+    if player.is_played:
+        canvas.draw_text(str(dealer.get_value()), [50, 100], 30, 'White')
+    canvas.draw_text('Balance: ' + str(player_balance.current_balance()), [400, 100], 30, 'White')
+    canvas.draw_text('Bet: ' + str(player_balance.current_bet()), [400, 500], 30, 'White')
 
 def deal():
     global deck, player, dealer
-    deck = Deck()
-    deck.shuffle()
-    player, dealer = Hand(), Hand()
-    i = 2
-    while i != 0:
-        player.add_card(deck.deal_card())
-        dealer.add_card(deck.deal_card())
-        i -= 1
-    dealer.cards()[0].cover()
-    if player.get_value() == 21:
-        stand()
+    if player_balance.is_bet:
+        player.expose()
+        dealer.cards()[1].expose()
+        if player.get_value() == 21:
+            stand()
+    else:
+        player_balance.set_bet(50)
+        deck = Deck()
+        deck.shuffle()
+        player, dealer = Hand(), Hand()
+        i = 2
+        while i != 0:
+            player.add_card(deck.deal_card())
+            dealer.add_card(deck.deal_card())
+            i -= 1
+        player.cover()
+        dealer.cover()
 
 def hit():
     global player, deck
@@ -127,19 +193,35 @@ def hit():
         stand()
 
 def stand():
-    global dealer, deck
+    global dealer, deck, player
+    player.played()
     dealer.cards()[0].expose()
     if player.get_value() <= 21:
         while dealer.get_value() < 17:
             dealer.add_card(deck.deal_card())
     else:
         print ('Dealer wins!')
+        player_balance.new_bet()
         return
     if dealer.get_value() < player.get_value() and player.get_value() <= 21 or dealer.get_value() > 21:
         print ('Player wins!')
+        player_balance.add()
     elif dealer.get_value() <= 21:
         print ('Dealer wins!')
+    player_balance.new_bet()
 
+def increase_bet():
+    global player_balance
+    player_balance.increase_bet(50)
+
+def decrease_bet():
+    global player_balance
+    player_balance.decrease_bet(50)
+
+def bet():
+    global player_balance
+    player_balance.make_bet()
+    deal()
 
 # deck = Deck()
 # deck.shuffle()
@@ -150,13 +232,17 @@ def stand():
 #     player.add_card(deck.deal_card())
 #     i -= 1
 
-frame = simplegui.create_frame("BlackJack", 600, 600)
-frame.set_canvas_background("Green")
+frame = simplegui.create_frame("BlackJack", 800, 534)
+frame._set_canvas_background_image(TABLE)
 frame.set_draw_handler(draw_handler)
 frame.add_button('Deal', deal, 100)
 frame.add_button('Hit', hit, 100)
 frame.add_button('Stand', stand, 100)
+frame.add_button('Increase bet', increase_bet, 150)
+frame.add_button('BET', bet, 100)
+frame.add_button('Decrease bet', decrease_bet, 150)
 
+player_balance = Balance(1000)
 deal()
 frame.start()
 
