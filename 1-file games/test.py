@@ -1,4 +1,11 @@
-import SimpleGUICS2Pygame.simpleguics2pygame as simplegui
+### Mini Project of Week #2 ###
+### Blackjack ###
+### The purpouse of this project, is to implement this simple game, using object programming
+# As some external things, I've used: background image, bet system (very simple)
+try:
+    import SimpleGUICS2Pygame.simpleguics2pygame as simplegui
+except:
+    import simplegui
 import random
 
 CARD_SIZE = (72, 96)
@@ -13,8 +20,12 @@ SUITS = ('C', 'S', 'H', 'D')
 RANKS = ('A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K')
 VALUES = {'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'T': 10, 'J': 10, 'Q': 10, 'K': 10}
 
+# uploading background image
 TABLE = simplegui.load_image(
     "https://www.dropbox.com/s/h4ol6hlkasogwva/360_F_93364974_eoos8QGsa9CzTa5hGRRL6EutXMSKgdOA.jpg?dl=1")
+
+# global variable for text in center of canvas
+CENTER_TEXT = 'Make your bet!'
 
 
 class Card:
@@ -102,14 +113,12 @@ class Hand:
             pos[0] += 50
 
 
+# external class for implementing bet system
 class Balance:
     def __init__(self, start_balance):
         self.balance = start_balance
         self.bet = 0
         self.is_bet = False
-
-    # def bet(self):
-    #     self.balance -= self.bet
 
     def add(self):
         self.balance += self.bet * 2
@@ -153,9 +162,6 @@ class Deck:
     def __str__(self):
         return str(self.cards_deck)
 
-    # def card(self):
-    #     return self.cards_deck[0].rank
-
     def shuffle(self):
         random.shuffle(self.cards_deck)
 
@@ -166,23 +172,27 @@ class Deck:
 
 
 def draw_handler(canvas):
-    player.draw(canvas, [200, 300])
+    player.draw(canvas, [200, 360])
     dealer.draw(canvas, [200, 100])
-    canvas.draw_text(str(player.get_value()), [50, 300], 30, 'White')
+    if player_balance.is_bet or player.is_played:
+        canvas.draw_text(str(player.get_value()), [50, 400], 30, 'White')
     if player.is_played:
         canvas.draw_text(str(dealer.get_value()), [50, 100], 30, 'White')
-    canvas.draw_text('Balance: ' + str(player_balance.current_balance()), [400, 100], 30, 'White')
+    canvas.draw_text('Balance: ' + str(player_balance.current_balance()), [400, 50], 30, 'White')
     canvas.draw_text('Bet: ' + str(player_balance.current_bet()), [400, 500], 30, 'White')
+    canvas.draw_text(CENTER_TEXT, [170, 275], 40, 'White', 'serif')
 
 
 def deal():
-    global deck, player, dealer, player_balance
+    global deck, player, dealer, player_balance, CENTER_TEXT
     if player_balance.is_bet:
         player.expose()
         dealer.cards()[1].expose()
         if player.get_value() == 21:
             stand()
+            CENTER_TEXT = 'Player wins! Press "Deal" to restart'
     else:
+        CENTER_TEXT = 'Make your bet!'
         player_balance.set_bet(50)
         deck = Deck()
         deck.shuffle()
@@ -207,7 +217,7 @@ def hit():
 
 
 def stand():
-    global dealer, deck, player
+    global dealer, deck, player, CENTER_TEXT
     if player.is_played or not player_balance.is_bet:
         return
     player.played()
@@ -216,50 +226,55 @@ def stand():
         while dealer.get_value() < 17:
             dealer.add_card(deck.deal_card())
     else:
-        print('Dealer wins!')
+        print('Dealer wins! Press "Deal" to restart')
+        CENTER_TEXT = 'Dealer wins! Press "Deal" to restart'
         player_balance.new_bet()
         return
     if dealer.get_value() < player.get_value() and player.get_value() <= 21 or dealer.get_value() > 21:
-        print('Player wins!')
+        print('Player wins! Press "Deal" to restart')
+        CENTER_TEXT = 'Player wins!'
         player_balance.add()
     elif dealer.get_value() <= 21:
-        print('Dealer wins!')
+        print('Dealer wins! Press "Deal" to restart')
+        CENTER_TEXT = 'Dealer wins! Press "Deal" to restart'
     player_balance.new_bet()
 
 
+# below here are some external buttons for bet system
+# as number to increment of decrement bet, i've used number 50
 def increase_bet():
-    global player_balance, player
+    global player_balance, player, CENTER_TEXT
     if player_balance.is_bet or player.is_played:
         return
-    player_balance.increase_bet(50)
+    if player_balance.current_balance() <= player_balance.current_bet():
+        CENTER_TEXT = 'Not enough balance'
+    else:
+        player_balance.increase_bet(50)
+        CENTER_TEXT = 'Make your bet!'
 
 
 def decrease_bet():
-    global player_balance, player
+    global player_balance, player, CENTER_TEXT
     if player_balance.is_bet or player.is_played:
         return
-    player_balance.decrease_bet(50)
+    if player_balance.current_bet() == 50:
+        CENTER_TEXT = "You can't bet zero!"
+    else:
+        player_balance.decrease_bet(50)
+        CENTER_TEXT = 'Make your bet!'
 
 
 def bet():
-    global player_balance, player
+    global player_balance, player, CENTER_TEXT
     if player_balance.is_bet or player.is_played:
         return
     player_balance.make_bet()
     deal()
+    CENTER_TEXT = 'Hit or stand?'
 
-
-# deck = Deck()
-# deck.shuffle()
-# deck.deal_card()
-# player = Hand()
-# i = 3
-# while i != 0:
-#     player.add_card(deck.deal_card())
-#     i -= 1
 
 frame = simplegui.create_frame("BlackJack", 800, 534)
-frame._set_canvas_background_image(TABLE)
+frame.set_canvas_background_image(TABLE)
 frame.set_draw_handler(draw_handler)
 frame.add_button('Deal', deal, 100)
 frame.add_button('Hit', hit, 100)
@@ -268,6 +283,7 @@ frame.add_button('Increase bet', increase_bet, 150)
 frame.add_button('BET', bet, 100)
 frame.add_button('Decrease bet', decrease_bet, 150)
 
+# default setting of players balance
 player_balance = Balance(1000)
 deal()
 frame.start()
