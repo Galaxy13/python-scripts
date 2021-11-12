@@ -12,8 +12,10 @@ HEIGHT = 600
 score = 0
 lives = 3
 time = 0
+# I've added these variables to draw_text, without magical lists of text position
 TEXT_POSITION = (50, 50)
 SCORE_TEXT_POSITION = (50, 100)
+SHIP_GUN_LENGTH = 30
 
 
 class ImageInfo:
@@ -102,6 +104,7 @@ def angle_to_vector(ang):
 def dist(p, q):
     return math.sqrt((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)
 
+#this function is called, when obj is going out of the border, it just inverts pos[i] value
 def transition(pos):
     if pos[0] <= 0:
         pos[0] = WIDTH
@@ -113,8 +116,9 @@ def transition(pos):
         pos[1] = 0
     return pos
 
+#this function draws text information, such as lives and score
 def text_info(canvas):
-    canvas.draw_text('Lives:' + (WIDTH // 12) * ' ' + 'Score:', TEXT_POSITION, 30, 'White', 'serif')
+    canvas.draw_text('Lives:' + (WIDTH // 11) * ' ' + 'Score:', TEXT_POSITION, 30, 'White', 'serif')
     canvas.draw_text(str(lives) + (WIDTH // 10) * ' ' + str(score), SCORE_TEXT_POSITION, 30, 'White', 'serif')
 
 # Ship class
@@ -129,6 +133,7 @@ class Ship:
         self.image_center = info.get_center()
         self.image_size = info.get_size()
         self.radius = info.get_radius()
+        self.sound_played = False
 
     def draw(self, canvas):
         canvas.draw_image(self.image,self.image_center ,self.image_size, self.pos, self.image_size, self.angle)
@@ -144,6 +149,9 @@ class Ship:
             vector = angle_to_vector(self.angle)
             self.vel[0] += vector[0] * .2
             self.vel[1] += vector[1] * .2
+            if self.sound_played:
+                ship_thrust_sound.play()
+
 
         if self.pos[0] <= 0 or self.pos[0] >= WIDTH or self.pos[1] <= 0 or self.pos[1] >= HEIGHT:
             self.pos = transition(self.pos)
@@ -156,17 +164,19 @@ class Ship:
         self.image_center[0] += self.image_size[0]
         ship_thrust_sound.rewind()
         ship_thrust_sound.play()
+        self.sound_played = True
 
     def stop(self):
         self.thrust = False
         self.image_center[0] -= self.image_size[0]
         ship_thrust_sound.pause()
+        self.sound_played = False
 
     def shoot(self):
         global a_missile
         angle = self.angle
         vector = angle_to_vector(angle)
-        pos = [self.pos[0] + 2 * vector[0], self.pos[1] + 2 * vector[1]]
+        pos = [self.pos[0] + SHIP_GUN_LENGTH * vector[0], self.pos[1] + SHIP_GUN_LENGTH * vector[1]]
         vel = [vector[0] * 6 + self.vel[0], vector[1] * 6 + self.vel[1]]
         angle_vel = 0
         a_missile = Sprite(pos, vel, angle, angle_vel, missile_image, missile_info, missile_sound)
@@ -228,6 +238,7 @@ def draw(canvas):
 
 
 # timer handler that spawns a rock
+# I just don'rt want to put this... piece of code in class, so random.functions is calling, only in here
 def rock_spawner():
     global a_rock
     radius = a_rock.radius
