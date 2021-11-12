@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # project test files
-test.py
+1-file games/test.py
