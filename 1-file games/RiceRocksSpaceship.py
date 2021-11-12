@@ -12,6 +12,8 @@ HEIGHT = 600
 score = 0
 lives = 3
 time = 0
+TEXT_POSITION = (50, 50)
+SCORE_TEXT_POSITION = (50, 100)
 
 
 class ImageInfo:
@@ -100,6 +102,20 @@ def angle_to_vector(ang):
 def dist(p, q):
     return math.sqrt((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)
 
+def transition(pos):
+    if pos[0] <= 0:
+        pos[0] = WIDTH
+    elif pos[0] >= WIDTH:
+        pos[0] = 0
+    elif pos[1] <= 0:
+        pos[1] = HEIGHT
+    elif pos[1] >= HEIGHT:
+        pos[1] = 0
+    return pos
+
+def text_info(canvas):
+    canvas.draw_text('Lives:' + (WIDTH // 12) * ' ' + 'Score:', TEXT_POSITION, 30, 'White', 'serif')
+    canvas.draw_text(str(lives) + (WIDTH // 10) * ' ' + str(score), SCORE_TEXT_POSITION, 30, 'White', 'serif')
 
 # Ship class
 class Ship:
@@ -130,7 +146,7 @@ class Ship:
             self.vel[1] += vector[1] * .2
 
         if self.pos[0] <= 0 or self.pos[0] >= WIDTH or self.pos[1] <= 0 or self.pos[1] >= HEIGHT:
-            self.transition()
+            self.pos = transition(self.pos)
 
     def turn(self, sign):
         self.angle_vel = .1 * sign
@@ -146,19 +162,14 @@ class Ship:
         self.image_center[0] -= self.image_size[0]
         ship_thrust_sound.pause()
 
-    def transition(self):
-        if self.pos[0] <= 0:
-            self.pos[0] = WIDTH
-        elif self.pos[0] >= WIDTH:
-            self.pos[0] = 0
-
-        if self.pos[1] <= 0:
-            self.pos[1] = HEIGHT
-        elif self.pos[1] >= HEIGHT:
-            self.pos[1] = 0
-
     def shoot(self):
-        pass
+        global a_missile
+        angle = self.angle
+        vector = angle_to_vector(angle)
+        pos = [self.pos[0] + 2 * vector[0], self.pos[1] + 2 * vector[1]]
+        vel = [vector[0] * 6 + self.vel[0], vector[1] * 6 + self.vel[1]]
+        angle_vel = 0
+        a_missile = Sprite(pos, vel, angle, angle_vel, missile_image, missile_info, missile_sound)
 
 
 # Sprite class
@@ -187,13 +198,9 @@ class Sprite:
         self.pos[1] += self.vel[1]
         self.angle += self.angle_vel
 
-    def spawn(self):
-        self.pos[0] = random.randrange(self.radius, WIDTH - self.radius)
-        self.pos[1] = random.randrange(self.radius, HEIGHT - self.radius)
-        self.vel[0] = random.randrange(-1, 1)
-        self.vel[1] = random.randrange(-1, 1)
-        self.angle = 0
-        self.angle_vel = random.randrange(-10, 10) * .01
+        if self.pos[0] <= 0 or self.pos[0] >= WIDTH or self.pos[1] <= 0 or self.pos[1] >= HEIGHT:
+            self.pos = transition(self.pos)
+
 
 def draw(canvas):
     global time
@@ -212,6 +219,7 @@ def draw(canvas):
     my_ship.draw(canvas)
     a_rock.draw(canvas)
     a_missile.draw(canvas)
+    text_info(canvas)
 
     # update ship and sprites
     my_ship.update()
@@ -221,7 +229,13 @@ def draw(canvas):
 
 # timer handler that spawns a rock
 def rock_spawner():
-    a_rock.spawn()
+    global a_rock
+    radius = a_rock.radius
+    pos = [random.randrange(radius, WIDTH - radius), random.randrange(radius, HEIGHT - radius)]
+    vel = [random.randrange(-1, 1), random.randrange(-1, 1)]
+    angle = 0
+    angle_vel = random.randrange(-10, 10) * .01
+    a_rock = Sprite(pos, vel, angle, angle_vel, asteroid_image, asteroid_info)
 
 
 def keydown(key):
@@ -231,12 +245,14 @@ def keydown(key):
         my_ship.turn(1)
     elif key == simplegui.KEY_MAP['space']:
         my_ship.thrusting()
+    elif key == simplegui.KEY_MAP['w']:
+        my_ship.shoot()
 
 
 def keyup(key):
     if simplegui.KEY_MAP['left'] == key or simplegui.KEY_MAP['right'] == key:
         my_ship.turn(0)
-    elif simplegui.KEY_MAP['space']:
+    elif simplegui.KEY_MAP['space'] == key:
         my_ship.stop()
 
 
