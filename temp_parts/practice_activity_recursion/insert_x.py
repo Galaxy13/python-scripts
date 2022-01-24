@@ -7,6 +7,5 @@ def insert_x(my_string):
 
 print(insert_x('catdog'))
 
-
 if 3 != 2:
     print(2)
