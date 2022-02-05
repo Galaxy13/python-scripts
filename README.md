@@ -54,7 +54,3 @@ You can use **tags** or **meanings** of the columns in CVS file, this would be i
 # Main contributors:
 
 - **Galaxy13**
-
-# Idea:
-
-- **Overflow922**
