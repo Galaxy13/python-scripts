@@ -1,13 +1,13 @@
-def containsDuplicate(nums) -> bool:
-    temp_list = []
-    i = 0
-    while i < (len(nums) // 2) - 1:
-        if nums[i] in temp_list or nums[-(i + 1)] in temp_list:
-            return True
-        else:
-            temp_list.append(nums[i])
-            temp_list.append(nums[-(i + 1)])
-    return False
+class Solution:
+    def containsDuplicate(self, nums) -> bool:
+        temp_dict = {}
+        for number in nums:
+            try:
+                temp_dict[number] += 1
+                return True
+            except:
+                temp_dict[number] = 0
+        return False
 
 
-print(containsDuplicate([1, 2, 3, 4]))
+print(Solution.containsDuplicate([1, 2, 3, 4]))
