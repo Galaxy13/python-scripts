@@ -1,9 +1,12 @@
 def solution(l):
-    count_stipes = 0
-    for index1 in range(len(l) - 2):
-        for index2 in range(index1 + 1, len(l) - 1):
-            if not l[index2] % l[index1]:
-                for index3 in range(index2 + 1, len(l)):
-                    if not l[index3] % l[index2]:
-                        count_stipes += 1
-    return count_stipes
+    count_of_divisors = {index:0 for index in range(len(l))}
+    count_of_lucky_triples = 0
+    for index_r in range(len(l)):
+        for index_l in range(0, index_r):
+            if not l[index_r] % l[index_l]:
+                count_of_divisors[index_r] += 1
+                count_of_lucky_triples += count_of_divisors[index_l]
+    return count_of_lucky_triples
+
+
+
