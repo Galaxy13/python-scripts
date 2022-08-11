@@ -1,6 +1,8 @@
 import datetime
 
 from docx.api import Document
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
+from docx.shared import Pt
 
 WEEKDAYSMAPPING = ["Понедельник", "Вторник",
                    "Среда", "Четверг", "Пятница",
@@ -64,33 +66,19 @@ class Column:
         return self._datetime_list
 
     def column_fill(self, col_name):
-        column = self.get_column(col_name)
-        index_of_date_list = 0
-        for cell in column.cells:
-            if cell.text:
-                cell.text = ('.'.join(('%02d' % self._datetime_list[index_of_date_list].day,
-                                       '%02d' % self._datetime_list[index_of_date_list].month)))
-                self._datetime_list[index_of_date_list] += datetime.timedelta(days=7)
-                index_of_date_list += 1
-                index_of_date_list %= len(self._datetime_list)
-
-    def save_document(self):
+        self.sort_datetime_list(self._datetime_list)
+        for table in self._document.tables:
+            for col in table.columns:
+                if col_name == col.cells[0].text or col_name == col.cells[1].text:
+                    index_of_date_list = 0
+                    for cell in col.cells:
+                        if cell.text == "":
+                            cell.text = ('.'.join(('%02d' % self._datetime_list[index_of_date_list].day,
+                                                   '%02d' % self._datetime_list[index_of_date_list].month)))
+                            self._datetime_list[index_of_date_list] += datetime.timedelta(days=7)
+                            cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+                            cell.paragraphs[0].runs[0].font.size = Pt(12)
+                            cell.paragraphs[0].runs[0].font.name = 'Times New Roman'
+                            index_of_date_list += 1
+                            index_of_date_list %= len(self._datetime_list)
         self._document.save('doc' + str(datetime.date.today()) + ".docx")
-
-
-
-
-
-# dayOfTheWeek = WEEKDAYSMAPPING[datetime.date(2022, 5, 3).weekday()]
-# date = datetime.date(2022, 5, 3)
-# print(dayOfTheWeek)
-
-# for row_idx in range(len(doc_table.rows)):
-#     for cell in doc_table.row_cells(row_idx):
-#         if cell.text == '':
-#             date += datetime.timedelta(days=7)
-#             cell.text = (' - '.join(('%02d' % date.day, '%02d' % date.month, weekDaysMapping[date.weekday()])))
-#             break
-#     row_idx += 1
-
-# document.save('test2.docx')
