@@ -14,7 +14,7 @@ class Solution:
             else:
                 indicator = True
             fast_p = fast_p.next
-        return slow_p.val
+        return slow_p
 
 def listToNode(test_list):
     if not test_list:

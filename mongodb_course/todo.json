@@ -1,0 +1,17 @@
+{
+  "id": 1,
+  "name": "Patrick",
+  "text": "My first todo!",
+  "status": "open",
+  "tags": [
+    {
+          "tag_name": "python",
+          "category": "coding"
+    },
+    {
+          "tag_name": "mongoDB",
+          "category": "database"
+    }
+  ],
+  "date": "2021-05-12 08:37:48.57973"
+}
