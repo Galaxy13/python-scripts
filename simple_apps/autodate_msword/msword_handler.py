@@ -13,6 +13,7 @@ class Column:
     def __init__(self, document_path):
         self._document = Document(document_path)
         self._datetime_list = []
+        self._restricted_dates = []
 
     def get_column(self, col_name):
         for table in self._document.tables:
@@ -65,6 +66,23 @@ class Column:
     def get_list_of_datetime(self):
         return self._datetime_list
 
+    def _is_restricted_date(self, date):
+        for rdate in self._restricted_dates:
+            if date >= rdate[0] and date <= rdate[1]:
+                return False
+            else:
+                continue
+        return True
+
+    def set_restricted_dates(self, rest_dates):
+        self._restricted_dates = rest_dates
+
+    def get_restricted_date(self, date):
+        date += datetime.timedelta(days=7)
+        while not self._is_restricted_date(date):
+            date += datetime.timedelta(days=7)
+        return date
+
     def column_fill(self, col_name):
         self.sort_datetime_list(self._datetime_list)
         for table in self._document.tables:
@@ -75,7 +93,8 @@ class Column:
                         if cell.text == "":
                             cell.text = ('.'.join(('%02d' % self._datetime_list[index_of_date_list].day,
                                                    '%02d' % self._datetime_list[index_of_date_list].month)))
-                            self._datetime_list[index_of_date_list] += datetime.timedelta(days=7)
+                            self._datetime_list[index_of_date_list] = \
+                                self.get_restricted_date(self._datetime_list[index_of_date_list])
                             cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
                             cell.paragraphs[0].runs[0].font.size = Pt(12)
                             cell.paragraphs[0].runs[0].font.name = 'Times New Roman'
