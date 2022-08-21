@@ -1,0 +1,5 @@
+tkinderdnd2
+tkcalendar==1.6.1
+playsound==1.2.2
+python-docx==0.8.11
+pillow
