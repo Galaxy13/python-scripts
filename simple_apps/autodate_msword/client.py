@@ -40,7 +40,7 @@ WEEKDAYS = {0: 'Понедельник',
 
 def dragged(event):
     global doc
-    doc = msword_handler.Column(event.data.format('utf-8'))
+    doc = msword_handler.Column(event.data[1:-1])
     textbox.destroy()
     comboBox(doc)
     place_button_plus()
@@ -139,9 +139,12 @@ def clear_last_line():
     if not restricted_calendar:
         playsound(u'mp3/durak.mp3', block=False)
     else:
-        restricted_textbox.delete('end-2l', 'end-1l')
-        restricted_textbox.update()
-        restricted_calendar.pop(-1)
+        if not restricted_textbox.get('2.0', END):
+            restricted_textbox.delete('1.0', END)
+        else:
+            restricted_textbox.delete('end-2l', 'end-1l')
+            restricted_textbox.update()
+            restricted_calendar.pop(-1)
 
 
 def comboBox(doc):
@@ -251,7 +254,7 @@ def place_date_to_rest_cal_dict(calendar_pair, top_window):
                               ' - '.join(('%02d' % int(date_pair[0][1]), '%02d' % int(date_pair[0][0]),
                                           '20' + date_pair[0][2]))
                               + ' : ' + ' - '.join(('%02d' % int(date_pair[1][1]), '%02d' % int(date_pair[1][0]),
-                                                    '20' + date_pair[1][2])))
+                                                    '20' + date_pair[1][2])) + '\n')
     top_window.destroy()
     top_window.update()
 
