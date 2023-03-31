@@ -1,0 +1,3 @@
+movies = ["Parasite","1917","Ford v Ferrari","Jojo Rabbit","Joker"]
+similarities = [["Parasite", "1917"],["Parasite", "Jojo Rabbit"],["Joker", "Ford v Ferrari"]]
+friends = [["Joker"],["Joker","1917"],["Joker"],["Parasite"],["1917"],["Jojo Rabbit", "Joker"]]
