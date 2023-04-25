@@ -9,8 +9,8 @@ bbox = gds_file.top_level()
 if not os.path.exists('svg_layer'):
     os.makedirs('svg_layer')
 
-for i, layer in enumerate(bbox):
-    layer.write_svg(f'svg_layer/layer{i}.svg')
+for i, cell in enumerate(bbox):
+    cell.write_svg(f'svg_layer/layer{i}.svg')
 
 svg_files = os.listdir('svg_layer')
 
