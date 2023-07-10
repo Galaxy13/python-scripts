@@ -1,0 +1,1 @@
+(select gnp / (select max(gnp) from country) * 100 as gnp_p, (surfacearea / population) / (select max(surfacearea / population) from country where population != 0) * 100 as apc_p, name from country c where population != 0)
